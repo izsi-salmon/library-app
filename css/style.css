@@ -8,7 +8,7 @@
   padding-top: var(--jumbotron-padding-y);
   padding-bottom: var(--jumbotron-padding-y);
   margin-bottom: 0;
-  background-color: #fff;
+  background-color: #F29E00;
 }
 @media (min-width: 768px) {
   .jumbotron {
@@ -22,11 +22,22 @@
 }
 
 .jumbotron-heading {
+  font-size: 4em;
+    font-style: italic;
   font-weight: 300;
+}
+
+.jumbotron-description{
+    color: #FFF !important;
 }
 
 .jumbotron .container {
   max-width: 40rem;
+}
+
+.btn-primary{
+    background-color: #0054C9;
+    border: none;
 }
 
 footer {
@@ -39,6 +50,16 @@ footer p {
 }
 
 /* Main css */
+
+.form-wrapper{
+    margin: 5em auto;
+    width: 40%
+}
+
+.form-title{
+    color: #454545;
+    margin-bottom: 0.8em;
+}
 
 .fa-book-open{
   display: inline-block;
@@ -54,4 +75,8 @@ footer p {
   border-left: none;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+}
+
+.form-add-book{
+    margin: 3em;
 }
