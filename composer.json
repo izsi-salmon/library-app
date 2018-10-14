@@ -1,0 +1,6 @@
+{
+    "require": {
+        "vlucas/phpdotenv": "^2.5",
+        "intervention/image": "^2.4"
+    }
+}
