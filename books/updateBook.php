@@ -2,6 +2,104 @@
 
   $page = 'Edit Book';
   require("../templates/header.php");
+
+  $id = $_GET['id'];
+  $sql = 'SELECT * FROM `books` WHERE id = '.$id;
+  $result = mysqli_query($dbc, $sql);
+
+  if($result && mysqli_affected_rows($dbc) > 0){
+    $singleBook = mysqli_fetch_array($result, MYSQLI_ASSOC);
+  } else{
+    die('Error, book could not be found');
+  }
+
+  if($_POST){
+    // var_dump($_POST);
+
+    extract($_POST);
+
+    $validationErrors = array();
+    $errors = array();
+
+    // Validate firstName & lastName
+
+    if(!$bookname){
+      array_push($validationErrors, 'Please enter a book title.');
+    }  else if(strlen($bookname) > 100){
+      array_push($validationErrors, 'Book title cannot be more than 100 characters.');
+    }
+
+    if(!$author){
+      array_push($validationErrors, 'Please enter the Author\'s name.');
+    } else if(strlen($author) < 2){
+      array_push($validationErrors, 'Please enter atleast two characters for the author\'s name.');
+    } else if(strlen($author) > 100){
+      array_push($validationErrors, 'Author name cannot be more than 100 characters.');
+    }
+
+
+    if(!$description){
+      array_push($validationErrors, 'Please enter a description for the book.');
+    } else if(strlen($description) < 20){
+      array_push($validationErrors, 'Please enter a description of more than 20 characters.');
+    }
+
+    if(isset($_FILES["bookimg"])){
+      $fileSize = $_FILES['bookimg']['size'];
+      $fileTmp = $_FILES['bookimg']['tmp_name'];
+      $fileType = $_FILES['bookimg']['type'];
+        //If the file is over 5mb
+        if($fileSize > 5000000){
+            array_push($validationErrors, "The file is to large, must be under 5MB");
+        } else {
+          $validExtensions = array("jpeg", "jpg", "png");
+          $fileNameArray = explode(".", $_FILES["bookimg"]["name"]);
+          $fileExt = strtolower(end($fileNameArray));
+          if(in_array($fileExt, $validExtensions) === false){
+              array_push($validationErrors, "File type not allowed, can only be a jpg or png");
+          }
+        }
+      }
+
+      if(empty($errors) && empty($validationErrors)){
+
+        $title = mysqli_real_escape_string($dbc, $bookname);
+        $author = mysqli_real_escape_string($dbc, $author);
+        $description = mysqli_real_escape_string($dbc, $description);
+
+        $sql = 'UPDATE `books` SET `book_name`='.$bookname.',`author`='.$author.',`description`='.$description.', WHERE id ='.$id;
+
+        if(isset($_FILES["bookimg"])){
+          $newFileName = uniqid().'.'.$fileExt;
+          $filename = mysqli_real_escape_string($dbc, $newFileName);
+          $sql = 'UPDATE `books` SET `image_name`='.$filename.', WHERE id ='.$id;
+        }
+
+        $result = mysqli_query($dbc, $sql);
+        if($result && mysqli_affected_rows($dbc) > 0){
+
+          $lastID = $dbc->insert_id;
+
+          $destination = '../images/';
+          if(!is_dir($destination)){
+            mkdir('../images/', 0777, true);
+          }
+
+          $manager = new ImageManager();
+          $mainImage = $manager->make($fileTmp);
+          $mainImage->save($destination."/".$newFileName, 100);
+
+          header("location: viewBook.php?id=$lastID");
+
+        }
+
+      } else{
+        var_dump($errors);
+        var_dump($validationErrors);
+      }
+
+  }
+
 ?>
 </head>
 <body>
@@ -49,16 +147,25 @@
         <div class="form-wrapper">
           <div class="col">
             <div class="card mb-4 shadow-sm">
-              <form class="form-add-book">
+              <form class="form-add-book" action="books/updateBook.php?id=<?= $singleBook['id']; ?>" method="post" enctype="multipart/form-data">
+                <?php if($_POST && !empty($validationErrors)): ?>
+                <div class="alert alert-danger" role="alert">
+                    <ul>
+                        <?php foreach($validationErrors as $warning): ?>
+                            <li><?= $warning; ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <?php endif; ?>
                  <h3 class="form-title">Edit book:</h3>
                   <div class="form-group">
-                    <input name="bookname" type="text" class="form-control" value="Book title">
+                    <input name="bookname" type="text" class="form-control" value="<?= $singleBook['book_name']; ?>">
                   </div>
                   <div class="form-group">
-                    <input name="author" type="text" class="form-control" value="Author name">
+                    <input name="author" type="text" class="form-control" value="<?= $singleBook['author']; ?>">
                   </div>
                   <div class="form-group">
-                    <textarea name="description" class="form-control" rows="3">Book description</textarea>
+                    <textarea name="description" class="form-control" rows="3"><?= $singleBook['description']; ?></textarea>
                   </div>
                   <div class="form-group">
                     <label>Edit cover image:</label>

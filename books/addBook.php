@@ -71,6 +71,8 @@
         $result = mysqli_query($dbc, $sql);
         if($result && mysqli_affected_rows($dbc) > 0){
 
+          $lastID = $dbc->insert_id;
+
           $destination = '../images/';
           if(!is_dir($destination)){
             mkdir('../images/', 0777, true);
@@ -80,7 +82,7 @@
           $mainImage = $manager->make($fileTmp);
           $mainImage->save($destination."/".$newFileName, 100);
 
-          header("location: viewBook.php");
+          header("location: viewBook.php?id=$lastID");
 
         }
 

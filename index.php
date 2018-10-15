@@ -4,6 +4,17 @@
   // $css = '<link rel="stylesheet" href="css/style.css">';
   require("templates/header.php");
 
+  $sql = 'SELECT * FROM `books` ORDER BY `date_added`';
+  $result = mysqli_query($dbc, $sql);
+
+
+  if($result){
+    $allBooks = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+  } else{
+    die('Error, no results.');
+  }
+
 ?>
 <body>
 
@@ -53,144 +64,54 @@
     <div class="album py-5 bg-light">
       <div class="container">
 
+        <!-- <h3>Latest book:</h3>
         <div class="row">
           <div class="col-md-4">
             <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
+              <img class="card-img-top" src="./images/<?= $latestBook['image_name']; ?>" alt="Card image cap">
               <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
+                <h5><?= $latestBook['book_name']; ?></h5>
+                <small class="text-muted"><?= $latestBook['author']; ?></small>
+                <p class="card-text"><?= $latestBook['description']; ?></p>
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
+                    <a href="books/viewBook.php?id=<?= $latestBook['id']; ?>" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
                     <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
                   </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
-                  </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
-                  </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
-                </div>
-              </div>
-            </div>
-          </div>
+        </div>
+        <hr> -->
+        
+        <div class="row">
 
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
+          <?php if($allBooks): ?>
+            <?php foreach ($allBooks as $singleBook): ?>
+              <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                  <img class="card-img-top" src="./images/<?= $singleBook['image_name']; ?>" alt="Card image cap">
+                  <div class="card-body">
+                    <h5><?= $singleBook['book_name']; ?></h5>
+                    <small class="text-muted"><?= $singleBook['author']; ?></small>
+                    <p class="card-text"><?= $singleBook['description']; ?></p>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="btn-group">
+                        <a href="books/viewBook.php?id=<?= $singleBook['id']; ?>" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
+                        <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
+                      </div>
+                    </div>
                   </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
                 </div>
               </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="col">
+              <p>Sorry, there aren't any books in the library at the moment.</p>
             </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
-                  </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
-                  </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
-                </div>
-              </div>
-            </div>
-          </div>
+          <?php endif; ?>
 
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
-                  </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
-                  </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
-              <div class="card-body">
-                <p class="card-text">A little description about the book.</p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <a href="books/viewBook.php" class="view-btn"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
-                    <a href="books/updateBook.php" class="edit-btn"><button type="button" class="btn btn-sm btn-outline-secondary">Edit</button></a>
-                  </div>
-                  <!-- <small class="text-muted">9 mins</small> -->
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

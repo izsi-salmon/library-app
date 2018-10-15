@@ -2,6 +2,18 @@
 
   $page = 'View Book';
   require("../templates/header.php");
+
+  $id = $_GET['id'];
+  $sql = 'SELECT * FROM `books` WHERE id = '.$id;
+  $result = mysqli_query($dbc, $sql);
+
+  if($result && mysqli_affected_rows($dbc) > 0){
+    $singleBook = mysqli_fetch_array($result, MYSQLI_ASSOC);
+  } else{
+    die('ERROR 404');
+    // header('location: ../errors/404.php');
+  }
+
 ?>
 
 <body>
@@ -49,13 +61,14 @@
         <div class="form-wrapper">
           <div class="col">
             <div class="card mb-4 shadow-sm">
-              <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&bg=55595c&fg=eceeef&text=Thumbnail" alt="Card image cap">
+              <img class="card-img-top" src="./images/<?= $singleBook['image_name']; ?>" alt="Card image cap">
               <div class="card-body">
-               <h4 class="form-title">Book title</h4>
-                <p class="card-text">A little description about the book.</p>
+               <h4 class="form-title"><?= $singleBook['book_name']; ?></h4>
+               <small class="text-muted"><?= $singleBook['author']; ?></small>
+                <p class="card-text"><?= $singleBook['description']; ?></p>
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="btn-group">
-                    <a href="books/updateBook.php"><button class="btn btn-primary">Edit</button></a>
+                    <a href="books/updateBook.php?id=<?= $singleBook['id']; ?>"><button class="btn btn-primary">Edit</button></a>
                   </div>
                 </div>
               </div>
