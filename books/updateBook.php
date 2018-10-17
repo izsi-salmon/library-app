@@ -3,18 +3,30 @@
   $page = 'Edit Book';
   require("../templates/header.php");
 
+  use Intervention\Image\ImageManager;
+
   $id = $_GET['id'];
   $sql = 'SELECT * FROM `books` WHERE id = '.$id;
   $result = mysqli_query($dbc, $sql);
 
+
+
+
   if($result && mysqli_affected_rows($dbc) > 0){
-    $singleBook = mysqli_fetch_array($result, MYSQLI_ASSOC);
-  } else{
-    die('Error, book could not be found');
-  }
+        $singleBook = mysqli_fetch_array($result, MYSQLI_ASSOC);
+        $originalName = $singleBook['image_name'];
+    } else if($result && mysqli_affected_rows($dbc) == 0){
+        die("ERROR 404");
+    } else {
+        die("ERROR: cannot get the data requested");
+    }
+
+
+  // FORM VALIDATION
 
   if($_POST){
     // var_dump($_POST);
+    // var_dump($_FILES);
 
     extract($_POST);
 
@@ -37,29 +49,34 @@
       array_push($validationErrors, 'Author name cannot be more than 100 characters.');
     }
 
-
     if(!$description){
       array_push($validationErrors, 'Please enter a description for the book.');
     } else if(strlen($description) < 20){
       array_push($validationErrors, 'Please enter a description of more than 20 characters.');
     }
 
-    if(isset($_FILES["bookimg"])){
+    if(file_exists($_FILES['bookimg']['tmp_name'])){
       $fileSize = $_FILES['bookimg']['size'];
       $fileTmp = $_FILES['bookimg']['tmp_name'];
       $fileType = $_FILES['bookimg']['type'];
-        //If the file is over 5mb
-        if($fileSize > 5000000){
-            array_push($validationErrors, "The file is to large, must be under 5MB");
-        } else {
-          $validExtensions = array("jpeg", "jpg", "png");
-          $fileNameArray = explode(".", $_FILES["bookimg"]["name"]);
-          $fileExt = strtolower(end($fileNameArray));
-          if(in_array($fileExt, $validExtensions) === false){
-              array_push($validationErrors, "File type not allowed, can only be a jpg or png");
-          }
+
+      //If the file is over 5mb
+      if($fileSize > 5000000){
+          array_push($validationErrors, "The file is to large, must be under 5MB");
+      } else {
+        $validExtensions = array("jpeg", "jpg", "png");
+        $fileNameArray = explode(".", $_FILES["bookimg"]["name"]);
+        $fileExt = strtolower(end($fileNameArray));
+        if(in_array($fileExt, $validExtensions) === false){
+            array_push($validationErrors, "File type not allowed, can only be a jpg or png");
         }
       }
+
+    }
+
+
+
+    // ERROR VALIDATION | SQL QUERY | IMAGE SAVING
 
       if(empty($errors) && empty($validationErrors)){
 
@@ -67,38 +84,44 @@
         $author = mysqli_real_escape_string($dbc, $author);
         $description = mysqli_real_escape_string($dbc, $description);
 
-        $sql = 'UPDATE `books` SET `book_name`='.$bookname.',`author`='.$author.',`description`='.$description.', WHERE id ='.$id;
+        $sql = "UPDATE `books` SET `book_name`='$title',`author`='$author',`description`='$description'";
 
-        if(isset($_FILES["bookimg"])){
+        if(file_exists($_FILES['bookimg']['tmp_name'])){
           $newFileName = uniqid().'.'.$fileExt;
           $filename = mysqli_real_escape_string($dbc, $newFileName);
-          $sql = 'UPDATE `books` SET `image_name`='.$filename.', WHERE id ='.$id;
+          $sql .= ", `image_name`='$filename'";
         }
+
+        $sql .= ' WHERE id = '.$id;
 
         $result = mysqli_query($dbc, $sql);
         if($result && mysqli_affected_rows($dbc) > 0){
 
-          $lastID = $dbc->insert_id;
+          if(file_exists($_FILES['bookimg']['tmp_name'])){
+            unlink('../images/'.$originalName);
 
-          $destination = '../images/';
-          if(!is_dir($destination)){
-            mkdir('../images/', 0777, true);
+            $destination = '../images/';
+            if(!is_dir($destination)){
+              mkdir('../images/', 0777, true);
+            }
+
+            $manager = new ImageManager();
+            $mainImage = $manager->make($fileTmp);
+            $mainImage->save($destination."/".$newFileName, 100);
           }
 
-          $manager = new ImageManager();
-          $mainImage = $manager->make($fileTmp);
-          $mainImage->save($destination."/".$newFileName, 100);
-
-          header("location: viewBook.php?id=$lastID");
 
         }
+
+        header('location: viewBook.php?id='.$id);
 
       } else{
         var_dump($errors);
         var_dump($validationErrors);
+        die('ERROR');
       }
 
-  }
+  } 
 
 ?>
 </head>
@@ -159,17 +182,20 @@
                 <?php endif; ?>
                  <h3 class="form-title">Edit book:</h3>
                   <div class="form-group">
-                    <input name="bookname" type="text" class="form-control" value="<?= $singleBook['book_name']; ?>">
+                    <input name="bookname" type="text" class="form-control" value="<?php if($_POST){echo $_POST['bookname'];} else{echo $singleBook['book_name'];} ?>">
                   </div>
                   <div class="form-group">
-                    <input name="author" type="text" class="form-control" value="<?= $singleBook['author']; ?>">
+                    <input name="author" type="text" class="form-control" value="<?php if($_POST){echo $_POST['author'];} else{echo $singleBook['author'];} ?>">
                   </div>
                   <div class="form-group">
-                    <textarea name="description" class="form-control" rows="3"><?= $singleBook['description']; ?></textarea>
+                    <textarea name="description" class="form-control" rows="3"><?php if($_POST){echo $_POST['description'];} else{echo $singleBook['description'];} ?></textarea>
                   </div>
+                  <!-- <div class="image-float">
+                    <img src="./images/<?= $singleBook['image_name']; ?>">
+                  </div> -->
                   <div class="form-group">
                     <label>Edit cover image:</label>
-                    <input type="file" class="form-control-file">
+                    <input name="bookimg" type="file" class="form-control-file">
                   </div>
                   <button type="submit" class="btn btn-primary">Save</button>
                 </form>
