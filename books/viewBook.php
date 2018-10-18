@@ -4,7 +4,13 @@
   require("../templates/header.php");
 
   $id = $_GET['id'];
-  $sql = 'SELECT * FROM `books` WHERE id = '.$id;
+  // $sql = 'SELECT * FROM `books` WHERE id = '.$id;
+  // Getting data from two different tables, joining them together into one query.
+  $sql = "SELECT books.id as bookID, book_name, description, image_name, authors.id as authorID, author_name as author ";
+  $sql .= "FROM books INNER JOIN authors ON books.author_id = authors.id WHERE books.id = $id";
+
+  die($sql);
+
   $result = mysqli_query($dbc, $sql);
 
   if($result && mysqli_affected_rows($dbc) > 0){

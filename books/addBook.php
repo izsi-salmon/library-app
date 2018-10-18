@@ -6,7 +6,7 @@
   use Intervention\Image\ImageManager;
 
   if($_POST){
-    // var_dump($_POST);
+    var_dump($_POST);
 
     extract($_POST);
 
@@ -58,17 +58,29 @@
       if(empty($errors) && empty($validationErrors)){
 
         $title = mysqli_real_escape_string($dbc, $bookname);
+        $authorID = mysqli_real_escape_string($dbc, $authorID);
         $author = mysqli_real_escape_string($dbc, $author);
         $description = mysqli_real_escape_string($dbc, $description);
 
         $newFileName = uniqid().'.'.$fileExt;
         $filename = mysqli_real_escape_string($dbc, $newFileName);
 
-        $sql = "INSERT INTO `books`(`book_name`, `author`, `description`, `image_name`) VALUES ('$title','$author','$description','$filename')";
+        // Currently trying to make a query that sends Author name and book info separately
+        // Issue: Can't set book info without defining auto id
 
-        // die($sql);
+        if($_POST["authorID"] > 0){
+          $sql = "INSERT INTO `books`(`book_name`, `author_id`, `description`, `image_name`) VALUES ('$title','$authorID','$description','$filename')";
+        } else {
+          $sqlAut = "INSERT INTO `authors`(`author_name`) VALUES ('$author')";
+          $sql = "INSERT INTO `books`(`book_name`, `description`, `image_name`) VALUES ('$title','$description','$filename')";
+        }
 
+        // var_dump($sqlAut);
+        die($sql);
+
+        $resultAut = mysqli_query($dbc, $sqlAut);
         $result = mysqli_query($dbc, $sql);
+
         if($result && mysqli_affected_rows($dbc) > 0){
 
           $lastID = $dbc->insert_id;
@@ -150,8 +162,11 @@
                   <div class="form-group">
                     <input name="bookname" type="text" class="form-control" placeholder="Book title" value="<?php if(isset($_POST['bookname'])){echo $_POST['bookname'];} ?>">
                   </div>
-                  <div class="form-group">
-                    <input name="author" type="text" class="form-control" placeholder="Author name" value="<?php if(isset($_POST['author'])){echo $_POST['author'];} ?>">
+                  <div class="form-group author-group">
+                    <input name="author" type="text" autocomplete="off" class="form-control" placeholder="Author name" value="<?php if(isset($_POST['author'])){echo $_POST['author'];} ?>">
+                    <input type="hidden" name="authorID">
+                    <div id="autoCompleteAuthors">
+                    </div>
                   </div>
                   <div class="form-group">
                     <textarea name="description" class="form-control" rows="3" placeholder="Describe this book"><?php if(isset($_POST['description'])){echo $_POST['description'];} ?></textarea>

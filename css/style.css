@@ -61,6 +61,31 @@ footer p {
     margin-bottom: 0.8em;
 }
 
+.author-group{
+  position: relative;
+}
+
+#autoCompleteAuthors{
+  display: none;
+  height: auto;
+  width: 100%;
+  background-color: #FFF;
+  border: 1px solid black;
+  position: absolute;
+  z-index: 500;
+}
+
+#autoCompleteAuthors div{
+  padding: 10px;
+  cursor: pointer;
+  background-color: #FFF;
+  border-bottom: 1px solid black;
+}
+
+#autoCompleteAuthors div:hover{
+  background-color: #C8C8C8;
+}
+
 .fa-book-open{
   display: inline-block;
   margin-right: 0.5em;
